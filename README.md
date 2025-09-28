@@ -20,7 +20,6 @@
 1. **Скачать проект:**
    ```bash
    git clone https://github.com/botass740/diplom_qa_0925/tree/main
-   cd qamid-diplom-RM-2025
    ```
 
 2. **Подготовить проект:**

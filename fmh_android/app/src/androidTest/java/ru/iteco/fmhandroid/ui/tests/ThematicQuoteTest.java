@@ -18,7 +18,6 @@ import static ru.iteco.fmhandroid.ui.steps.AuthorizationSteps.getLogin;
 import static ru.iteco.fmhandroid.ui.steps.AuthorizationSteps.getPassword;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
 import org.junit.Before;
@@ -26,6 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import io.qameta.allure.android.runners.AllureAndroidJUnit4;
 import io.qameta.allure.kotlin.Description;
 import io.qameta.allure.kotlin.Epic;
 import ru.iteco.fmhandroid.R;
@@ -33,7 +33,6 @@ import ru.iteco.fmhandroid.ui.AppActivity;
 import ru.iteco.fmhandroid.ui.steps.AuthorizationSteps;
 import ru.iteco.fmhandroid.ui.steps.MainSteps;
 import ru.iteco.fmhandroid.ui.steps.ThematicQuoteSteps;
-import io.qameta.allure.android.runners.AllureAndroidJUnit4;
 
 @LargeTest
 @RunWith(AllureAndroidJUnit4.class)

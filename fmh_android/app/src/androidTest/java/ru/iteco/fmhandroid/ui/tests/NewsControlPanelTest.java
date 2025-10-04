@@ -15,7 +15,6 @@ import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static ru.iteco.fmhandroid.ui.data.DataHelper.waitDisplayed;
 import static ru.iteco.fmhandroid.ui.data.DataHelper.waitFor;
-import static ru.iteco.fmhandroid.ui.data.DataHelper.withIndex;
 import static ru.iteco.fmhandroid.ui.steps.AuthorizationSteps.getLogin;
 import static ru.iteco.fmhandroid.ui.steps.AuthorizationSteps.getPassword;
 import static ru.iteco.fmhandroid.ui.steps.NewsControlPanelSteps.getCategoryAdvertisement;

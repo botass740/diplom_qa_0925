@@ -9,11 +9,9 @@
 package ru.iteco.fmhandroid.ui.tests;
 
 import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.assertion.ViewAssertions.matches;
-import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static ru.iteco.fmhandroid.ui.data.DataHelper.waitDisplayed;
+import static ru.iteco.fmhandroid.ui.data.DataHelper.waitFor;
 import static ru.iteco.fmhandroid.ui.steps.AuthorizationSteps.getDifferentRegexLogin;
 import static ru.iteco.fmhandroid.ui.steps.AuthorizationSteps.getDifferentRegexPassword;
 import static ru.iteco.fmhandroid.ui.steps.AuthorizationSteps.getLogin;
@@ -28,10 +26,8 @@ import static ru.iteco.fmhandroid.ui.steps.AuthorizationSteps.getUnregisteredPas
 import android.view.View;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -41,12 +37,11 @@ import org.junit.runner.RunWith;
 import io.qameta.allure.android.runners.AllureAndroidJUnit4;
 import io.qameta.allure.kotlin.Description;
 import io.qameta.allure.kotlin.Epic;
-import io.qameta.allure.kotlin.Story;
 import ru.iteco.fmhandroid.R;
 import ru.iteco.fmhandroid.ui.AppActivity;
+import ru.iteco.fmhandroid.ui.data.TestData;
 import ru.iteco.fmhandroid.ui.steps.AuthorizationSteps;
 import ru.iteco.fmhandroid.ui.steps.MainSteps;
-import ru.iteco.fmhandroid.ui.data.TestData;
 
 @LargeTest
 @RunWith(AllureAndroidJUnit4.class)
@@ -68,7 +63,7 @@ public class AuthorizationTest {
         try {
             onView(isRoot()).perform(waitDisplayed(R.id.splashscreen_image_view, 10000));
             // Ждём, пока splashscreen_image_view исчезнет (View.GONE)
-            Thread.sleep(1000); // небольшой запас, чтобы splash точно исчез
+            onView(isRoot()).perform(waitFor(1000)); // небольшой запас, чтобы splash точно исчез
         } catch (Exception ignored) {}
         try {
             authorizationSteps.loadAuthorizationPage();

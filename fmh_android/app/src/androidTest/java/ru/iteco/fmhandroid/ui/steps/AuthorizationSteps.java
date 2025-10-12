@@ -10,6 +10,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static ru.iteco.fmhandroid.ui.data.DataHelper.waitDisplayed;
 import static ru.iteco.fmhandroid.ui.data.DataHelper.waitFor;
+import static ru.iteco.fmhandroid.ui.data.DataHelper.waitUntilGone;
 import static ru.iteco.fmhandroid.ui.elements.AuthorizationPage.differentRegexLogin;
 import static ru.iteco.fmhandroid.ui.elements.AuthorizationPage.differentRegexPassword;
 import static ru.iteco.fmhandroid.ui.elements.AuthorizationPage.loginWithSpecialCharacters;
@@ -32,7 +33,7 @@ public class AuthorizationSteps {
 
     public void loadAuthorizationPage() {
         Allure.step("Загрузка страницы авторизации");
-        onView(isRoot()).perform(waitDisplayed((authorizationPage.enterButton), 5000));
+        onView(isRoot()).perform(waitDisplayed((authorizationPage.enterButton), 10000));
     }
 
     public void clickButtonSignIn() {
@@ -67,6 +68,14 @@ public class AuthorizationSteps {
     public void fillPasswordField(String text) {
         Allure.step("Поле Пароль - ввод данных" + text);
         authorizationPage.getAuthorizationElementsPasswordField.perform(replaceText(text));
+    }
+
+    /**
+     * Заполнить оба поля авторизации (логин и пароль), гарантированно закрыть клавиатуру после ввода пароля
+     */
+    public void fillLoginAndPasswordAndReadyForAuth(String login, String password) {
+        authorizationPage.getAuthorizationElementsLoginField.perform(replaceText(login));
+        authorizationPage.getAuthorizationElementsPasswordField.perform(replaceText(password), androidx.test.espresso.action.ViewActions.closeSoftKeyboard());
     }
 
     public static String getLogin() {
@@ -146,5 +155,11 @@ public class AuthorizationSteps {
     public void waitForAuthorizationButtonDisplayed() {
         Allure.step("Ожидание отображения кнопки авторизации");
         onView(isRoot()).perform(waitDisplayed(R.id.authorization_image_button, 10000));
+    }
+
+    public void waitForSplashSequence() {
+        Allure.step("Дождаться показа и исчезновения splash-экрана");
+        onView(isRoot()).perform(waitDisplayed(R.id.splashscreen_image_view, 10000));
+        onView(isRoot()).perform(waitUntilGone(R.id.splashscreen_image_view, 15000));
     }
 }

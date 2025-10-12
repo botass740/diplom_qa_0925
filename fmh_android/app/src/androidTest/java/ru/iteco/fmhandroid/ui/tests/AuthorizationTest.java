@@ -2,7 +2,7 @@
  * Автор: Максим Романов
  * Группа: QAMID-87
  * Дипломная работа профессии Инженер по тестированию: с нуля до middle
- * 
+ * <p>
  * Тесты авторизации для мобильного приложения "Мобильный хоспис"
  */
 
@@ -11,7 +11,6 @@ package ru.iteco.fmhandroid.ui.tests;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static ru.iteco.fmhandroid.ui.data.DataHelper.waitDisplayed;
-import static ru.iteco.fmhandroid.ui.data.DataHelper.waitFor;
 import static ru.iteco.fmhandroid.ui.steps.AuthorizationSteps.getDifferentRegexLogin;
 import static ru.iteco.fmhandroid.ui.steps.AuthorizationSteps.getDifferentRegexPassword;
 import static ru.iteco.fmhandroid.ui.steps.AuthorizationSteps.getLogin;
@@ -59,12 +58,8 @@ public class AuthorizationTest {
 
     @Before
     public void setUp() {
-        // Ждём исчезновения splash-экрана (максимум 10 секунд)
-        try {
-            authorizationSteps.waitForSplashScreenDisplayed();
-            // Ждём, пока splashscreen_image_view исчезнет (View.GONE)
-            authorizationSteps.waitForSplashScreenDisappear(); // небольшой запас, чтобы splash точно исчез
-        } catch (Exception ignored) {}
+        // Корректное ожидание splash: последовательно показать и исчезнуть
+        authorizationSteps.waitForSplashSequence();
         try {
             authorizationSteps.loadAuthorizationPage();
         } catch (
@@ -91,8 +86,7 @@ public class AuthorizationTest {
     public void testSuccessfulLoginWithValidCredentials() {
         onView(isRoot()).perform(waitDisplayed(authorizationSteps.getLoginLayout(), 5000));
         authorizationSteps.textAuthorization();
-        authorizationSteps.fillLoginField(getLogin());
-        authorizationSteps.fillPasswordField(getPassword());
+        authorizationSteps.fillLoginAndPasswordAndReadyForAuth(getLogin(), getPassword());
         authorizationSteps.clickButtonSignIn();
         authorizationSteps.waitForAuthorizationButtonDisplayed();
         mainSteps.showTitleNewsOnMain();
@@ -152,7 +146,6 @@ public class AuthorizationTest {
         authorizationSteps.fillLoginField(getDifferentRegexLogin());
         authorizationSteps.fillPasswordField(getPassword());
         authorizationSteps.clickButtonSignIn();
-        onView(isRoot()).perform(waitFor(2000)); // Даём время на обработку запроса и появление Toast
         authorizationSteps.assertToastWithText(decorView, TestData.ERROR_SOMETHING_WENT_WRONG);
     }
 

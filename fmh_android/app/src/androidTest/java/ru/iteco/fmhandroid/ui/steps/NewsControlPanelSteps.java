@@ -13,6 +13,9 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
+import static androidx.test.espresso.matcher.ViewMatchers.withParent;
+import static org.hamcrest.Matchers.allOf;
 import static ru.iteco.fmhandroid.ui.elements.NewsControlPanelPage.categoryAdvertisement;
 import static ru.iteco.fmhandroid.ui.elements.NewsControlPanelPage.categoryBirthday;
 import static ru.iteco.fmhandroid.ui.elements.NewsControlPanelPage.categoryCelebration;
@@ -51,7 +54,6 @@ import static ru.iteco.fmhandroid.ui.elements.NewsControlPanelPage.titleSalaryEn
 import static ru.iteco.fmhandroid.ui.elements.NewsControlPanelPage.titleUnion;
 import static ru.iteco.fmhandroid.ui.data.DataHelper.withIndex;
 import static ru.iteco.fmhandroid.ui.data.DataHelper.waitFor;
-import static ru.iteco.fmhandroid.ui.data.DataHelper.waitDisplayed;
 import static androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
 
 import androidx.test.espresso.ViewAction;
@@ -574,9 +576,6 @@ public class NewsControlPanelSteps {
         fillDescriptionCreatingNews("Тестовое описание для удаления");
         clickButtonSaveCreatingNews();
         
-        // Ждем возврата на экран списка новостей
-        waitForNewsListScreen();
-        
         return uniqueTitle;
     }
 
@@ -917,12 +916,24 @@ public class NewsControlPanelSteps {
      * Проверяет описание новости по заголовку
      */
     public void assertNewsDescriptionByTitle(String title, String expectedDescription) {
-        Allure.step("Проверяем описание новости с заголовком: " + title);
-        onView(withId(R.id.news_list_recycler_view))
-            .perform(androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem(
-                androidx.test.espresso.matcher.ViewMatchers.hasDescendant(Matchers.allOf(withId(R.id.news_item_title_text_view), withText(title))),
-                assertChildTextEquals(R.id.news_item_description_text_view, expectedDescription)
-            ));
+        Allure.step("Проверка описания новости с title '" + title + "': " + expectedDescription);
+        onView(withId(R.id.news_list_recycler_view)).perform(
+            androidx.test.espresso.contrib.RecyclerViewActions.scrollTo(
+                hasDescendant(allOf(withId(R.id.news_item_title_text_view), withText(title)))
+            )
+        );
+        expandNewsByTitle(title);
+        // Явное ожидание появления description видимым
+        onView(allOf(
+            withId(R.id.news_item_description_text_view),
+            withText(expectedDescription),
+            withParent(hasDescendant(allOf(withId(R.id.news_item_title_text_view), withText(title))))
+        )).perform(ru.iteco.fmhandroid.ui.data.DataHelper.waitDisplayed(R.id.news_item_description_text_view, 3000));
+        onView(allOf(
+            withId(R.id.news_item_description_text_view),
+            withText(expectedDescription),
+            withParent(hasDescendant(allOf(withId(R.id.news_item_title_text_view), withText(title))))
+        )).check(matches(isDisplayed()));
     }
 
     /**
@@ -982,26 +993,6 @@ public class NewsControlPanelSteps {
         onView(isRoot()).perform(waitFor(500));
     }
 
-    /**
-     * Открывает редактирование новости по заголовку (точечно)
-     */
-    public void editNewsByTitlePrecise(String title) {
-        Allure.step("Открываем редактирование новости с заголовком: " + title);
-        // Раскрываем карточку по заголовку
-        onView(withId(R.id.news_list_recycler_view))
-            .perform(androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem(
-                androidx.test.espresso.matcher.ViewMatchers.hasDescendant(Matchers.allOf(withId(R.id.news_item_title_text_view), withText(title))),
-                click()
-            ));
-        // Нажимаем кнопку редактирования именно в этой карточке
-        onView(withId(R.id.news_list_recycler_view))
-            .perform(androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem(
-                androidx.test.espresso.matcher.ViewMatchers.hasDescendant(Matchers.allOf(withId(R.id.news_item_title_text_view), withText(title))),
-                clickChildViewWithId(R.id.edit_news_item_image_view)
-            ));
-        onView(isRoot()).perform(waitFor(500));
-    }
-
     private static androidx.test.espresso.ViewAction clickChildViewWithId(final int id) {
         return new androidx.test.espresso.ViewAction() {
             @Override
@@ -1054,30 +1045,52 @@ public class NewsControlPanelSteps {
             .check(matches(isDisplayed()));
     }
 
-    // Методы ожидания для соблюдения принципов POM (Page Object Model)
-    
     /**
-     * Ожидание отображения списка новостей
+     * Устойчиво ждет появления описания новости по title с попытками expand, до 10 раз
      */
-    public void waitForNewsListDisplayed() {
-        Allure.step("Ожидание отображения списка новостей");
-        onView(isRoot()).perform(waitDisplayed(R.id.news_list_recycler_view, 5000));
+    public void waitForNewsDescriptionVisibleByTitle(String title, String expectedDescription) {
+        int MAX_ATTEMPTS = 10;
+        for (int i = 0; i < MAX_ATTEMPTS; i++) {
+            expandNewsByTitle(title);
+            try {
+                onView(allOf(
+                    withId(R.id.news_item_description_text_view),
+                    withText(expectedDescription),
+                    withParent(hasDescendant(allOf(withId(R.id.news_item_title_text_view), withText(title))))
+                )).check(matches(isDisplayed()));
+                return;
+            } catch (AssertionError | Exception e) {
+                try { Thread.sleep(400); } catch (InterruptedException ex) { /* ignore */ }
+            }
+        }
+        throw new AssertionError("Description не найден у новости: " + title);
     }
 
     /**
-     * Ожидание отображения экрана редактирования новости
+     * Устойчиво ждет появления даты публикации у новости по title с попытками expand, до 10 раз
      */
-    public void waitForEditScreenDisplayed() {
-        Allure.step("Ожидание отображения экрана редактирования новости");
-        onView(isRoot()).perform(waitDisplayed(R.id.switcher, 5000));
-    }
-
-    /**
-     * Ожидание отображения кнопки сохранения
-     */
-    public void waitForSaveButtonDisplayed() {
-        Allure.step("Ожидание отображения кнопки сохранения");
-        onView(isRoot()).perform(waitDisplayed(R.id.save_button, 5000));
+    public void waitForNewsPublicationDateVisibleByTitle(String title, String expectedDate) {
+        int MAX_ATTEMPTS = 10;
+        for (int i = 0; i < MAX_ATTEMPTS; i++) {
+            expandNewsByTitle(title);
+            try {
+                // scrollTo по дате публикации ВНУТРИ карточки с нужным title
+                onView(allOf(
+                    withId(R.id.news_item_publication_date_text_view),
+                    withText(expectedDate),
+                    withParent(hasDescendant(allOf(withId(R.id.news_item_title_text_view), withText(title))))
+                )).perform(androidx.test.espresso.action.ViewActions.scrollTo());
+                onView(allOf(
+                    withId(R.id.news_item_publication_date_text_view),
+                    withText(expectedDate),
+                    withParent(hasDescendant(allOf(withId(R.id.news_item_title_text_view), withText(title))))
+                )).check(matches(isDisplayed()));
+                return;
+            } catch (AssertionError | Exception e) {
+                try { Thread.sleep(400); } catch (InterruptedException ex) { /* ignore */ }
+            }
+        }
+        throw new AssertionError("Publication date не найдена у новости: " + title);
     }
 }
 

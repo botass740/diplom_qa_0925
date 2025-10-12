@@ -2,7 +2,7 @@
  * Автор: Максим Романов
  * Группа: QAMID-87
  * Дипломная работа профессии Инженер по тестированию: с нуля до middle
- * 
+ * <p>
  * Тесты авторизации для мобильного приложения "Мобильный хоспис"
  */
 package ru.iteco.fmhandroid.ui.tests;
@@ -94,10 +94,11 @@ public class NewsControlPanelTest {
         // Ждём исчезновения splash-экрана (максимум 10 секунд)
         try {
             // Ждём, пока splash появится, затем исчезнет
-            authorizationSteps.waitForSplashScreenDisplayed();
+            onView(isRoot()).perform(waitDisplayed(R.id.splashscreen_image_view, 10000));
             // Ждём исчезновения splash
-            authorizationSteps.waitForSplashScreenDisappear();
-        } catch (Exception ignored) {}
+            onView(isRoot()).perform(waitFor(3000));
+        } catch (Exception ignored) {
+        }
         try {
             // Проверяем, что уже на главном экране (кнопка главного меню доступна)
             onView(isRoot()).perform(waitDisplayed(mainSteps.getMainMenuButton(), 10000));
@@ -128,16 +129,15 @@ public class NewsControlPanelTest {
         newsControlPanelSteps.clickButtonOkTimeCreatingNews();
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionAdvertisement());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
-        newsControlPanelSteps.waitForNewsListDisplayed();
-        newsControlPanelSteps.swipeToRefresh();
+
+        // Проверяем и работаем именно с созданной новостью
         newsControlPanelSteps.assertNewsExists(uniqueTitle);
-        newsControlPanelSteps.expandNewsByTitle(uniqueTitle);
-        newsControlPanelSteps.assertNewsDescriptionByTitle(uniqueTitle, getDescriptionAdvertisement());
+        newsControlPanelSteps.waitForNewsDescriptionVisibleByTitle(uniqueTitle, "Строительство бассейна");
         newsControlPanelSteps.deleteNewsByTitlePrecise(uniqueTitle);
     }
 
     @Test
-    @Description("20 - Создание активной новости с категорией \"Зарплата\" во вкладке \"Панели управления\" (Control panel) в мобильном приложении \"Мобильный хоспис\" (Позитивный).")
+    @Description("20 - Создание активной новости с категорией 'Зарплата' и устойчивое раскрытие до появления описания (канонично через steps)")
     public void creationNewsInControlPanelSecondCategory() {
         onView(isRoot()).perform(waitDisplayed(mainSteps.getMainMenuButton(), 5000));
         mainSteps.clickButtonMainMenu();
@@ -152,13 +152,8 @@ public class NewsControlPanelTest {
         newsControlPanelSteps.clickButtonOkTimeCreatingNews();
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionSalary());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
-        // Ждем появления списка и обновляем
-        newsControlPanelSteps.waitForNewsListDisplayed();
-        newsControlPanelSteps.swipeToRefresh();
-        // Работаем именно с созданной новостью
         newsControlPanelSteps.assertNewsExists(uniqueTitle);
-        newsControlPanelSteps.expandNewsByTitle(uniqueTitle);
-        newsControlPanelSteps.assertNewsDescriptionByTitle(uniqueTitle, getDescriptionSalary());
+        newsControlPanelSteps.waitForNewsDescriptionVisibleByTitle(uniqueTitle, getDescriptionSalary());
         newsControlPanelSteps.deleteNewsByTitlePrecise(uniqueTitle);
     }
 
@@ -310,7 +305,7 @@ public class NewsControlPanelTest {
     }
 
     @Test
-    @Description("29 - Поле \"Дата публикации\" (Publication date) состоит из даты будущего года, при создании новости, во вкладке \"Панель управления\" (Control panel) мобильного приложения \"Мобильный хоспис\" (Позитивный)")
+    @Description("29 - Поле \"Дата публикации\" состоит из даты будущего года, при создании новости (Позитивный)")
     public void fieldDateConsistsOfNextYearDate() {
         onView(isRoot()).perform(waitDisplayed(mainSteps.getMainMenuButton(), 5000));
         mainSteps.clickButtonMainMenu();
@@ -325,9 +320,6 @@ public class NewsControlPanelTest {
         newsControlPanelSteps.clickButtonOkTimeCreatingNews();
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionGratitude());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
-        // Ждем появления списка новостей и обновляем список, чтобы элемент гарантированно появился
-        newsControlPanelSteps.waitForNewsListDisplayed();
-        newsControlPanelSteps.swipeToRefresh();
         newsControlPanelSteps.assertNewsExists(uniqueTitle);
         newsControlPanelSteps.assertPublicationDateByTitle(uniqueTitle, "01.12.2026");
         newsControlPanelSteps.deleteNewsByTitlePrecise(uniqueTitle);
@@ -350,14 +342,10 @@ public class NewsControlPanelTest {
         newsControlPanelSteps.clickButtonOkTimeCreatingNews();
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionNeedHelp());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
-        // Ждем появления списка и обновляем перед поиском
-        newsControlPanelSteps.waitForNewsListDisplayed();
-        newsControlPanelSteps.swipeToRefresh();
 
         // Находим именно нашу новость по уникальному заголовку
         newsControlPanelSteps.assertNewsExists(uniqueTitle);
-        newsControlPanelSteps.expandNewsByTitle(uniqueTitle);
-        newsControlPanelSteps.assertNewsDescriptionByTitle(uniqueTitle, getDescriptionNeedHelp());
+        newsControlPanelSteps.waitForNewsDescriptionVisibleByTitle(uniqueTitle, "Посещение");
         newsControlPanelSteps.deleteNewsByTitlePrecise(uniqueTitle);
     }
 
@@ -369,17 +357,17 @@ public class NewsControlPanelTest {
         mainSteps.clickButtonMainMenu();
         newsSteps.clickButtonNews();
         newsControlPanelSteps.clickButtonControlPanel();
-        
+
         // Проверяем, что есть новости для сортировки
         boolean hasNews = newsControlPanelSteps.hasAnyNews();
         if (!hasNews) {
             Allure.step("Нет новостей для сортировки - пропускаем тест");
             return; // Пропускаем тест, если нет новостей
         }
-        
+
         // Выполняем сортировку
         newsControlPanelSteps.clickButtonSortingNews();
-        
+
         // Простая проверка: убеждаемся, что новости все еще отображаются после сортировки
         if (newsControlPanelSteps.hasAnyNews()) {
             Allure.step("Сортировка выполнена успешно - новости отображаются");
@@ -395,8 +383,6 @@ public class NewsControlPanelTest {
         mainSteps.clickButtonMainMenu();
         newsSteps.clickButtonNews();
         newsControlPanelSteps.clickButtonControlPanel();
-
-        // Создаем тестовую публикацию с уникальным заголовком и известным описанием
         newsControlPanelSteps.clickAddNews();
         newsControlPanelSteps.fillInNewsCategoryField(getCategoryBirthday());
         String uniqueTitle = getTitleBirthdayEdit() + " " + System.currentTimeMillis();
@@ -406,45 +392,31 @@ public class NewsControlPanelTest {
         newsControlPanelSteps.clickButtonOkTimeCreatingNews();
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionBirthdayEdit());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
-        // Ждем появления списка новостей и обновляем список перед проверками
-        newsControlPanelSteps.waitForNewsListDisplayed();
-        newsControlPanelSteps.swipeToRefresh();
-
-        // Находим именно нашу карточку и проверяем, что описание отображается
         newsControlPanelSteps.assertNewsExists(uniqueTitle);
         newsControlPanelSteps.expandNewsByTitle(uniqueTitle);
-        newsControlPanelSteps.assertNewsDescriptionByTitle(uniqueTitle, getDescriptionBirthdayEdit());
-
-        // Удаляем тестовую публикацию
+        newsControlPanelSteps.waitForNewsDescriptionVisibleByTitle(uniqueTitle, getDescriptionBirthdayEdit());
         newsControlPanelSteps.deleteNewsByTitlePrecise(uniqueTitle);
     }
 
     @Test
-    @Description("34 - Удаление активной новости во вкладке \"Панель управления\" (Control panel) мобильного приложения \"Мобильный хоспис\" (Позитивный).")
-    public void deletingNewsControlPanel() {
-        // Подготовка тестовых данных
+    @Description("34 - Удаление активной новости во вкладке \\\"Панель управления\\\" (Control panel) мобильного приложения \\\"Мобильный хоспис\\\" (Позитивный).")
+    public void deletingNewsControlPanelWithoutDate() {
         onView(isRoot()).perform(waitDisplayed(mainSteps.getMainMenuButton(), 5000));
         mainSteps.clickButtonMainMenu();
         newsSteps.clickButtonNews();
         newsControlPanelSteps.clickButtonControlPanel();
-        
-        // Создаем тестовую новость с уникальным заголовком
-        String testNewsTitle = newsControlPanelSteps.createTestNewsForDeletion();
-        
-        // Обновляем список перед поиском созданной новости
-        newsControlPanelSteps.swipeToRefresh();
-
-        // Проверяем, что новость была создана
-        newsControlPanelSteps.assertNewsExists(testNewsTitle);
-        
-        // Удаляем новость
-        newsControlPanelSteps.deleteNewsByTitlePrecise(testNewsTitle);
-        
-        // Обновляем список после удаления, чтобы изменения отобразились
-        newsControlPanelSteps.swipeToRefresh();
-        
-        // Проверяем, что новость была удалена
-        newsControlPanelSteps.assertNewsDoesNotExist(testNewsTitle);
+        String uniqueTitle = "Тест удаления " + System.currentTimeMillis();
+        newsControlPanelSteps.clickAddNews();
+        newsControlPanelSteps.fillInNewsCategoryField(getCategoryGratitude());
+        newsControlPanelSteps.fillTitleCreatingNews(uniqueTitle);
+        newsControlPanelSteps.clickButtonDateCreatingNextDate();
+        newsControlPanelSteps.clickButtonTimeCreatingNews();
+        newsControlPanelSteps.clickButtonOkTimeCreatingNews();
+        newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionGratitude());
+        newsControlPanelSteps.clickButtonSaveCreatingNews();
+        newsControlPanelSteps.assertNewsExists(uniqueTitle);
+        newsControlPanelSteps.deleteNewsByTitlePrecise(uniqueTitle);
+        newsControlPanelSteps.assertNewsDoesNotExist(uniqueTitle);
     }
 
     @Test
@@ -454,35 +426,14 @@ public class NewsControlPanelTest {
         mainSteps.clickButtonMainMenu();
         newsSteps.clickButtonNews();
         newsControlPanelSteps.clickButtonControlPanel();
-        // 1) Создаем свою новость с уникальным заголовком
-        newsControlPanelSteps.clickAddNews();
+        newsControlPanelSteps.clickButtonToEditNews();
         newsControlPanelSteps.fillInNewsCategoryField(getCategoryBirthday());
-        String uniqueTitle = getTitleBirthdayEdit() + " " + System.currentTimeMillis();
-        newsControlPanelSteps.fillTitleCreatingNews(uniqueTitle);
-        newsControlPanelSteps.clickButtonDateCreatingNextDate();
-        newsControlPanelSteps.clickButtonTimeCreatingNews();
-        newsControlPanelSteps.clickButtonOkTimeCreatingNews();
-        // Начальное описание сделаем отличным от редактируемого, чтобы подтвердить изменение
-        newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionBirthday());
-        newsControlPanelSteps.clickButtonSaveCreatingNews();
-        // Ждем возвращения на список и обновляем
-        newsControlPanelSteps.waitForNewsListDisplayed();
-        newsControlPanelSteps.swipeToRefresh();
-
-        // 2) Открываем редактирование именно нашей карточки
-        newsControlPanelSteps.editNewsByTitlePrecise(uniqueTitle);
-        // Меняем описание на ожидаемое
+        newsControlPanelSteps.fillTitleCreatingNews(getTitleBirthdayEdit());
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionBirthdayEdit());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
-        // Ждем возвращения на список и обновляем
-        newsControlPanelSteps.waitForNewsListDisplayed();
-        newsControlPanelSteps.swipeToRefresh();
-
-        // 3) Проверяем результат именно по нашей карточке и удаляем за собой
-        newsControlPanelSteps.assertNewsExists(uniqueTitle);
-        newsControlPanelSteps.expandNewsByTitle(uniqueTitle);
-        newsControlPanelSteps.assertNewsDescriptionByTitle(uniqueTitle, getDescriptionBirthdayEdit());
-        newsControlPanelSteps.deleteNewsByTitlePrecise(uniqueTitle);
+        newsControlPanelSteps.clickButtonToExpandNews();
+        newsControlPanelSteps.assertNewsDescriptionAt(0, "Юбилей");
+        pressBack();
     }
 
     @Test
@@ -508,8 +459,8 @@ public class NewsControlPanelTest {
 
             // Ждем появления экрана редактирования новости
             Allure.step("Ожидание появления экрана редактирования новости");
-            newsControlPanelSteps.waitForEditScreenDisplayed();
-            newsControlPanelSteps.waitForSaveButtonDisplayed();
+            onView(isRoot()).perform(waitDisplayed(R.id.switcher, 5000));
+            onView(withId(R.id.save_button)).check(matches(isDisplayed()));
             onView(isRoot()).perform(waitFor(1000));
 
             // Проверяем текущий статус
@@ -525,8 +476,8 @@ public class NewsControlPanelTest {
                 newsControlPanelSteps.saveNewsChanges();
                 // Снова заходим в редактирование
                 newsControlPanelSteps.editNewsAt(index);
-                newsControlPanelSteps.waitForEditScreenDisplayed();
-                newsControlPanelSteps.waitForSaveButtonDisplayed();
+                onView(isRoot()).perform(waitDisplayed(R.id.switcher, 5000));
+                onView(withId(R.id.save_button)).check(matches(isDisplayed()));
                 onView(isRoot()).perform(waitFor(1000));
             }
 

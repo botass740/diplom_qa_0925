@@ -103,4 +103,45 @@ public class DataHelper {
             }
         };
     }
+
+    public static ViewAction waitUntilGone(final int viewId, final long timeout) {
+        return new ViewAction() {
+            @Override
+            public Matcher<View> getConstraints() {
+                return isRoot();
+            }
+
+            @Override
+            public String getDescription() {
+                return "wait for a specific view with id <" + viewId + "> to be gone or not displayed during " + timeout + " millis.";
+            }
+
+            @Override
+            public void perform(androidx.test.espresso.UiController uiController, View view) {
+                final long startTime = System.currentTimeMillis();
+                final long endTime = startTime + timeout;
+
+                final Matcher<View> matchId = withId(viewId);
+                boolean anyDisplayed;
+                do {
+                    anyDisplayed = false;
+                    for (View child : TreeIterables.breadthFirstViewTraversal(view)) {
+                        if (matchId.matches(child) && child != null && child.isShown()) {
+                            anyDisplayed = true;
+                            break;
+                        }
+                    }
+                    if (!anyDisplayed) return; // все скрылись, можно завершать
+                    uiController.loopMainThreadForAtLeast(50);
+                } while (System.currentTimeMillis() < endTime);
+
+                // timeout happens
+                throw new PerformException.Builder()
+                        .withActionDescription(this.getDescription())
+                        .withViewDescription(HumanReadables.describe(view))
+                        .withCause(new TimeoutException())
+                        .build();
+            }
+        };
+    }
 }

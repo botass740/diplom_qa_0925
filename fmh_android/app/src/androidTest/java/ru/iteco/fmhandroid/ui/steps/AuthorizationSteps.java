@@ -9,6 +9,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static ru.iteco.fmhandroid.ui.data.DataHelper.waitDisplayed;
+import static ru.iteco.fmhandroid.ui.data.DataHelper.waitFor;
 import static ru.iteco.fmhandroid.ui.elements.AuthorizationPage.differentRegexLogin;
 import static ru.iteco.fmhandroid.ui.elements.AuthorizationPage.differentRegexPassword;
 import static ru.iteco.fmhandroid.ui.elements.AuthorizationPage.loginWithSpecialCharacters;
@@ -22,6 +23,7 @@ import static ru.iteco.fmhandroid.ui.elements.AuthorizationPage.unregisteredPass
 
 import io.qameta.allure.kotlin.Allure;
 import ru.iteco.fmhandroid.ui.elements.AuthorizationPage;
+import ru.iteco.fmhandroid.R;
 import org.hamcrest.Matchers;
 
 public class AuthorizationSteps {
@@ -113,8 +115,36 @@ public class AuthorizationSteps {
 
     public void assertToastWithText(android.view.View decorView, String text) {
         Allure.step("Проверка отображения тоста: " + text);
+        // Даём время на появление Toast
+        onView(isRoot()).perform(waitFor(1000));
         onView(withText(text))
                 .inRoot(withDecorView(Matchers.not(decorView)))
                 .check(matches(isDisplayed()));
+    }
+
+    // Методы ожидания для соблюдения принципов POM (Page Object Model)
+    
+    /**
+     * Ожидание отображения splash-экрана
+     */
+    public void waitForSplashScreenDisplayed() {
+        Allure.step("Ожидание отображения splash-экрана");
+        onView(isRoot()).perform(waitDisplayed(R.id.splashscreen_image_view, 10000));
+    }
+
+    /**
+     * Ожидание исчезновения splash-экрана
+     */
+    public void waitForSplashScreenDisappear() {
+        Allure.step("Ожидание исчезновения splash-экрана");
+        onView(isRoot()).perform(waitFor(1000));
+    }
+
+    /**
+     * Ожидание отображения кнопки авторизации (после успешного входа)
+     */
+    public void waitForAuthorizationButtonDisplayed() {
+        Allure.step("Ожидание отображения кнопки авторизации");
+        onView(isRoot()).perform(waitDisplayed(R.id.authorization_image_button, 10000));
     }
 }

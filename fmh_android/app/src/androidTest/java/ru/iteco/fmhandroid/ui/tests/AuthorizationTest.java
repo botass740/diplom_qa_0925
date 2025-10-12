@@ -61,9 +61,9 @@ public class AuthorizationTest {
     public void setUp() {
         // Ждём исчезновения splash-экрана (максимум 10 секунд)
         try {
-            onView(isRoot()).perform(waitDisplayed(R.id.splashscreen_image_view, 10000));
+            authorizationSteps.waitForSplashScreenDisplayed();
             // Ждём, пока splashscreen_image_view исчезнет (View.GONE)
-            onView(isRoot()).perform(waitFor(1000)); // небольшой запас, чтобы splash точно исчез
+            authorizationSteps.waitForSplashScreenDisappear(); // небольшой запас, чтобы splash точно исчез
         } catch (Exception ignored) {}
         try {
             authorizationSteps.loadAuthorizationPage();
@@ -94,7 +94,7 @@ public class AuthorizationTest {
         authorizationSteps.fillLoginField(getLogin());
         authorizationSteps.fillPasswordField(getPassword());
         authorizationSteps.clickButtonSignIn();
-        onView(isRoot()).perform(waitDisplayed(R.id.authorization_image_button, 10000));
+        authorizationSteps.waitForAuthorizationButtonDisplayed();
         mainSteps.showTitleNewsOnMain();
         // Logout выполняется в @After
     }
@@ -152,6 +152,7 @@ public class AuthorizationTest {
         authorizationSteps.fillLoginField(getDifferentRegexLogin());
         authorizationSteps.fillPasswordField(getPassword());
         authorizationSteps.clickButtonSignIn();
+        onView(isRoot()).perform(waitFor(2000)); // Даём время на обработку запроса и появление Toast
         authorizationSteps.assertToastWithText(decorView, TestData.ERROR_SOMETHING_WENT_WRONG);
     }
 

@@ -1,13 +1,17 @@
 package ru.iteco.fmhandroid.ui.steps;
 
+import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
+import static ru.iteco.fmhandroid.ui.data.DataHelper.waitDisplayed;
 
 import io.qameta.allure.kotlin.Allure;
 import ru.iteco.fmhandroid.ui.elements.ThematicQuotePage;
+import ru.iteco.fmhandroid.R;
 
 public class ThematicQuoteSteps {
 
@@ -33,5 +37,15 @@ public class ThematicQuoteSteps {
 
     public int getMissionImageButton() {
         return thematicQuotePage.missionImageButton;
+    }
+
+    // Методы ожидания для соблюдения принципов POM (Page Object Model)
+    
+    /**
+     * Ожидание отображения описания тематической цитаты
+     */
+    public void waitForQuoteDescriptionDisplayed() {
+        Allure.step("Ожидание отображения описания тематической цитаты");
+        onView(isRoot()).perform(waitDisplayed(R.id.our_mission_item_description_text_view, 5000));
     }
 }

@@ -67,6 +67,7 @@ public class ThematicQuoteTest {
         thematicQuoteSteps.clickButtonThematicQuote();
         thematicQuoteSteps.checkTitleThematicQuote();
         thematicQuoteSteps.clickButtonToExpandThematicQuote();
+        thematicQuoteSteps.waitForQuoteDescriptionDisplayed();
         onView(withIndex(withId(R.id.our_mission_item_description_text_view), 0)).check(matches(isDisplayed()));
     }
 }

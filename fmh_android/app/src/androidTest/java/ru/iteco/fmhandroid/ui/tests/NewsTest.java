@@ -65,6 +65,7 @@ public class NewsTest {
         onView(isRoot()).perform(waitDisplayed(mainSteps.getMainMenuButton(), 5000));
         mainSteps.clickButtonMainMenu();
         newsSteps.clickButtonNews();
+        newsSteps.waitForNewsContainerDisplayed();
         onView(allOf(withText("News"),
                 withParent(withParent(withId(R.id.container_list_news_include))))).check(matches(isDisplayed()));
     }
@@ -75,6 +76,7 @@ public class NewsTest {
         onView(isRoot()).perform(waitDisplayed(mainSteps.getMainMenuButton(), 5000));
         mainSteps.showButtonAllNews();
         mainSteps.clickButtonAllNews();
+        newsSteps.waitForNewsContainerDisplayed();
         onView(allOf(withText("News"),
                 withParent(withParent(withId(R.id.container_list_news_include))))).check(matches(isDisplayed()));
     }

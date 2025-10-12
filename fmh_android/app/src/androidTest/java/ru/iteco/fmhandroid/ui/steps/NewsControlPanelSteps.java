@@ -51,6 +51,7 @@ import static ru.iteco.fmhandroid.ui.elements.NewsControlPanelPage.titleSalaryEn
 import static ru.iteco.fmhandroid.ui.elements.NewsControlPanelPage.titleUnion;
 import static ru.iteco.fmhandroid.ui.data.DataHelper.withIndex;
 import static ru.iteco.fmhandroid.ui.data.DataHelper.waitFor;
+import static ru.iteco.fmhandroid.ui.data.DataHelper.waitDisplayed;
 import static androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
 
 import androidx.test.espresso.ViewAction;
@@ -573,6 +574,9 @@ public class NewsControlPanelSteps {
         fillDescriptionCreatingNews("Тестовое описание для удаления");
         clickButtonSaveCreatingNews();
         
+        // Ждем возврата на экран списка новостей
+        waitForNewsListScreen();
+        
         return uniqueTitle;
     }
 
@@ -1048,6 +1052,32 @@ public class NewsControlPanelSteps {
         Allure.step("Проверяем, что описание на позиции " + index + " отображается");
         onView(withIndex(withId(R.id.news_item_description_text_view), index))
             .check(matches(isDisplayed()));
+    }
+
+    // Методы ожидания для соблюдения принципов POM (Page Object Model)
+    
+    /**
+     * Ожидание отображения списка новостей
+     */
+    public void waitForNewsListDisplayed() {
+        Allure.step("Ожидание отображения списка новостей");
+        onView(isRoot()).perform(waitDisplayed(R.id.news_list_recycler_view, 5000));
+    }
+
+    /**
+     * Ожидание отображения экрана редактирования новости
+     */
+    public void waitForEditScreenDisplayed() {
+        Allure.step("Ожидание отображения экрана редактирования новости");
+        onView(isRoot()).perform(waitDisplayed(R.id.switcher, 5000));
+    }
+
+    /**
+     * Ожидание отображения кнопки сохранения
+     */
+    public void waitForSaveButtonDisplayed() {
+        Allure.step("Ожидание отображения кнопки сохранения");
+        onView(isRoot()).perform(waitDisplayed(R.id.save_button, 5000));
     }
 }
 

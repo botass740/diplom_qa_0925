@@ -79,7 +79,7 @@ public class MainTest {
         // Если 'ALL NEWS' не виден — кликнуть expand
         boolean allNewsVisible = true;
         try {
-            onView(withId(R.id.all_news_text_view)).check(matches(isDisplayed()));
+            mainSteps.waitForAllNewsTextViewDisplayed();
         } catch (AssertionError e) {
             allNewsVisible = false;
         }
@@ -87,6 +87,7 @@ public class MainTest {
             mainSteps.clickButtonToExpandNews();
         }
         // Проверить, что 'ALL NEWS' теперь виден
+        mainSteps.waitForAllNewsTextViewDisplayed();
         onView(withId(R.id.all_news_text_view)).check(matches(isDisplayed()));
     }
 }

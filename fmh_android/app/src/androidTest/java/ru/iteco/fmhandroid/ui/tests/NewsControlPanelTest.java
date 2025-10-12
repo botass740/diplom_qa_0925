@@ -94,9 +94,9 @@ public class NewsControlPanelTest {
         // Ждём исчезновения splash-экрана (максимум 10 секунд)
         try {
             // Ждём, пока splash появится, затем исчезнет
-            onView(isRoot()).perform(waitDisplayed(R.id.splashscreen_image_view, 10000));
+            authorizationSteps.waitForSplashScreenDisplayed();
             // Ждём исчезновения splash
-            onView(isRoot()).perform(waitFor(3000));
+            authorizationSteps.waitForSplashScreenDisappear();
         } catch (Exception ignored) {}
         try {
             // Проверяем, что уже на главном экране (кнопка главного меню доступна)
@@ -128,7 +128,7 @@ public class NewsControlPanelTest {
         newsControlPanelSteps.clickButtonOkTimeCreatingNews();
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionAdvertisement());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
-        onView(isRoot()).perform(waitDisplayed(R.id.news_list_recycler_view, 5000));
+        newsControlPanelSteps.waitForNewsListDisplayed();
         newsControlPanelSteps.swipeToRefresh();
         newsControlPanelSteps.assertNewsExists(uniqueTitle);
         newsControlPanelSteps.expandNewsByTitle(uniqueTitle);
@@ -153,7 +153,7 @@ public class NewsControlPanelTest {
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionSalary());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
         // Ждем появления списка и обновляем
-        onView(isRoot()).perform(waitDisplayed(R.id.news_list_recycler_view, 5000));
+        newsControlPanelSteps.waitForNewsListDisplayed();
         newsControlPanelSteps.swipeToRefresh();
         // Работаем именно с созданной новостью
         newsControlPanelSteps.assertNewsExists(uniqueTitle);
@@ -326,7 +326,7 @@ public class NewsControlPanelTest {
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionGratitude());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
         // Ждем появления списка новостей и обновляем список, чтобы элемент гарантированно появился
-        onView(isRoot()).perform(waitDisplayed(R.id.news_list_recycler_view, 5000));
+        newsControlPanelSteps.waitForNewsListDisplayed();
         newsControlPanelSteps.swipeToRefresh();
         newsControlPanelSteps.assertNewsExists(uniqueTitle);
         newsControlPanelSteps.assertPublicationDateByTitle(uniqueTitle, "01.12.2026");
@@ -351,7 +351,7 @@ public class NewsControlPanelTest {
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionNeedHelp());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
         // Ждем появления списка и обновляем перед поиском
-        onView(isRoot()).perform(waitDisplayed(R.id.news_list_recycler_view, 5000));
+        newsControlPanelSteps.waitForNewsListDisplayed();
         newsControlPanelSteps.swipeToRefresh();
 
         // Находим именно нашу новость по уникальному заголовку
@@ -407,7 +407,7 @@ public class NewsControlPanelTest {
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionBirthdayEdit());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
         // Ждем появления списка новостей и обновляем список перед проверками
-        onView(isRoot()).perform(waitDisplayed(R.id.news_list_recycler_view, 5000));
+        newsControlPanelSteps.waitForNewsListDisplayed();
         newsControlPanelSteps.swipeToRefresh();
 
         // Находим именно нашу карточку и проверяем, что описание отображается
@@ -431,8 +431,7 @@ public class NewsControlPanelTest {
         // Создаем тестовую новость с уникальным заголовком
         String testNewsTitle = newsControlPanelSteps.createTestNewsForDeletion();
         
-        // Ждем появления списка и обновляем перед поиском созданной новости
-        onView(isRoot()).perform(waitDisplayed(R.id.news_list_recycler_view, 5000));
+        // Обновляем список перед поиском созданной новости
         newsControlPanelSteps.swipeToRefresh();
 
         // Проверяем, что новость была создана
@@ -440,6 +439,9 @@ public class NewsControlPanelTest {
         
         // Удаляем новость
         newsControlPanelSteps.deleteNewsByTitlePrecise(testNewsTitle);
+        
+        // Обновляем список после удаления, чтобы изменения отобразились
+        newsControlPanelSteps.swipeToRefresh();
         
         // Проверяем, что новость была удалена
         newsControlPanelSteps.assertNewsDoesNotExist(testNewsTitle);
@@ -464,7 +466,7 @@ public class NewsControlPanelTest {
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionBirthday());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
         // Ждем возвращения на список и обновляем
-        onView(isRoot()).perform(waitDisplayed(R.id.news_list_recycler_view, 5000));
+        newsControlPanelSteps.waitForNewsListDisplayed();
         newsControlPanelSteps.swipeToRefresh();
 
         // 2) Открываем редактирование именно нашей карточки
@@ -473,7 +475,7 @@ public class NewsControlPanelTest {
         newsControlPanelSteps.fillDescriptionCreatingNews(getDescriptionBirthdayEdit());
         newsControlPanelSteps.clickButtonSaveCreatingNews();
         // Ждем возвращения на список и обновляем
-        onView(isRoot()).perform(waitDisplayed(R.id.news_list_recycler_view, 5000));
+        newsControlPanelSteps.waitForNewsListDisplayed();
         newsControlPanelSteps.swipeToRefresh();
 
         // 3) Проверяем результат именно по нашей карточке и удаляем за собой
@@ -506,8 +508,8 @@ public class NewsControlPanelTest {
 
             // Ждем появления экрана редактирования новости
             Allure.step("Ожидание появления экрана редактирования новости");
-            onView(isRoot()).perform(waitDisplayed(R.id.switcher, 5000));
-            onView(withId(R.id.save_button)).check(matches(isDisplayed()));
+            newsControlPanelSteps.waitForEditScreenDisplayed();
+            newsControlPanelSteps.waitForSaveButtonDisplayed();
             onView(isRoot()).perform(waitFor(1000));
 
             // Проверяем текущий статус
@@ -523,8 +525,8 @@ public class NewsControlPanelTest {
                 newsControlPanelSteps.saveNewsChanges();
                 // Снова заходим в редактирование
                 newsControlPanelSteps.editNewsAt(index);
-                onView(isRoot()).perform(waitDisplayed(R.id.switcher, 5000));
-                onView(withId(R.id.save_button)).check(matches(isDisplayed()));
+                newsControlPanelSteps.waitForEditScreenDisplayed();
+                newsControlPanelSteps.waitForSaveButtonDisplayed();
                 onView(isRoot()).perform(waitFor(1000));
             }
 

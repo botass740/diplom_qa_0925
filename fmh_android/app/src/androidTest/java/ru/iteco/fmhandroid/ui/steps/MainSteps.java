@@ -10,6 +10,7 @@ import static ru.iteco.fmhandroid.ui.data.DataHelper.waitDisplayed;
 
 import io.qameta.allure.kotlin.Allure;
 import ru.iteco.fmhandroid.ui.elements.MainPage;
+import ru.iteco.fmhandroid.R;
 
 public class MainSteps {
 
@@ -64,5 +65,15 @@ public class MainSteps {
 
     public int getButtonToExpandNews() {
         return mainPage.buttonToExpandNews;
+    }
+
+    // Методы ожидания для соблюдения принципов POM (Page Object Model)
+    
+    /**
+     * Ожидание отображения элемента "ALL NEWS"
+     */
+    public void waitForAllNewsTextViewDisplayed() {
+        Allure.step("Ожидание отображения элемента ALL NEWS");
+        onView(isRoot()).perform(waitDisplayed(R.id.all_news_text_view, 5000));
     }
 }
